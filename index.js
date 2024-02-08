@@ -26,28 +26,46 @@ const persons = [
 ];
 
 const typeDefinitions = gql`
-
- type Person {
+  type Person {
     id: ID!
     name: String!
     phone: String
     street: String!
     city: String!
-}
+    address: String!
+    check: String!
+  }
 
-type Query {
+  type Query {
     personCount: Int!
     allPersons: [Person]!
-}
-
+    allNamesCapitalCase: [String]!
+    findPerson(name: String!): Person
+  }
 `;
 
 const resolvers = {
-    Query: {
-        personCount: () => persons.length,
-        allPersons: () => persons
-    }
-}
+  Query: {
+    personCount: () => persons.length,
+    allPersons: () => persons,
+    allNamesCapitalCase: () => {
+      const arr = [];
+
+      persons.map((person) => {
+        arr.push(person.name.toLowerCase());
+      });
+      return arr;
+    },
+    findPerson: (root, args) => {
+      const { name } = args;
+      return persons.find((person) => person.name === name);
+    },
+  },
+  Person: {
+    address: (root) => `${root.street}, ${root.city}`,
+    check: () => "Good morning!"
+  },
+};
 
 
 const server = new ApolloServer({
@@ -55,7 +73,7 @@ const server = new ApolloServer({
   resolvers,
 });
 
-server.listen().then((url) => {
+server.listen({port: 5000}).then(({url}) => {
     console.log("Server ready at " + url);
 });
 
