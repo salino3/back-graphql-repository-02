@@ -1,6 +1,6 @@
 // npm i apollo-server graphql
 
-import {gql} from 'apollo-server';
+import {ApolloServer, gql} from 'apollo-server';
 
 const persons = [
   {
@@ -25,13 +25,37 @@ const persons = [
   },
 ];
 
-const typeDefs = gql`
+const typeDefinitions = gql`
+
  type Person {
     id: ID!
     name: String!
     phone: String
     street: String!
     city: String!
-}`;
+}
 
+type Query {
+    personCount: Int!
+    allPersons: [Person]!
+}
+
+`;
+
+const resolvers = {
+    Query: {
+        personCount: () => persons.length,
+        allPersons: () => persons
+    }
+}
+
+
+const server = new ApolloServer({
+  typeDefs: typeDefinitions,
+  resolvers,
+});
+
+server.listen().then((url) => {
+    console.log("Server ready at " + url);
+});
 
